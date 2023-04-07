@@ -7,16 +7,16 @@ object Solution {
   type Image = List[List[Pixel]]
   type GrayscaleImage = List[List[Double]]
 
-  // prerequisites
-  // from string to a ppm image
+
+  /**
+   *
+   * Converts a string representation of a PPM image to a two-dimensional list of pixels.
+   * @param image a list of characters representing the PPM image
+   * @return a two-dimensional list of pixels
+   */
   def fromStringPPM(image: List[Char]): Image = {
-    // divide the string into lines
     val lines = image.mkString.split("\n").toList
-
-    // extract the dimensions of the image
     val Array(width, height) = lines(1).split(" ").map(_.toInt)
-
-    // create a list of pixel lists for each line
     val pixelLines = lines.drop(3).grouped(width).toList.map { line =>
       line.map { pixelLine =>
         val Array(r, g, b) = pixelLine.split(" ").map(_.toInt)
@@ -27,7 +27,12 @@ object Solution {
     pixelLines
   }
 
-  //from ppm image to string
+  /**
+   *
+   * Converts a two-dimensional list of pixels to a string representation of a PPM image.
+   * @param image a two-dimensional list of pixels
+   * @return a list of characters representing the PPM image
+   */
   def toStringPPM(image: Image): List[Char] = {
     // get the dimensions of the image
     val width = image.headOption.map(_.size).getOrElse(0)
@@ -47,17 +52,29 @@ object Solution {
   }
 
   // ex 1
-  //concatenate 2 images vertically
+
+  /**
+   *
+   * Concatenates two images vertically.
+   * @param image1 the first image
+   * @param image2 the second image
+   * @return a new image that is the concatenation of the two input images
+   */
   def verticalConcat(image1: Image, image2: Image): Image = {
     image1 ++ image2
   }
 
   // ex 2
-  //concatenate 2 imagest orizontally
+
+  /**
+   *
+   * Concatenates two images horizontally.
+   * @param image1 the first image
+   * @param image2 the second image
+   * @return a new image that is the concatenation of the two input images
+   */
   def horizontalConcat(image1: Image, image2: Image): Image = {
-    image1.zip(image2).map { case (line1, line2) =>
-      line1 ++ line2
-    }
+    image1.zip(image2).map { case (line1, line2) => line1 ++ line2 }
   }
 
 
@@ -91,23 +108,23 @@ object Solution {
 
   // ex 4
   val gaussianBlurKernel: GrayscaleImage = List[List[Double]](
-    List( 1, 4, 7, 4, 1),
-    List( 4,16,26,16, 4),
-    List( 7,26,41,26, 7),
-    List( 4,16,26,16, 4),
-    List( 1, 4, 7, 4, 1)
+    List(1, 4, 7, 4, 1),
+    List(4, 16, 26, 16, 4),
+    List(7, 26, 41, 26, 7),
+    List(4, 16, 26, 16, 4),
+    List(1, 4, 7, 4, 1)
   ).map(_.map(_ / 273))
 
-  val Gx : GrayscaleImage = List(
+  val Gx: GrayscaleImage = List(
     List(-1, 0, 1),
     List(-2, 0, 2),
     List(-1, 0, 1)
   )
 
-  val Gy : GrayscaleImage = List(
-    List( 1, 2, 1),
-    List( 0, 0, 0),
-    List(-1,-2,-1)
+  val Gy: GrayscaleImage = List(
+    List(1, 2, 1),
+    List(0, 0, 0),
+    List(-1, -2, -1)
   )
 
 
@@ -152,7 +169,19 @@ object Solution {
     result
   }
 
-
   // ex 5
-  def moduloPascal(m: Integer, funct: Integer => Pixel, size: Integer): Image = ???
+  def moduloPascal(m: Integer, funct: Integer => Pixel, size: Integer): Image = {
+    // create a function that generates the next row of the Pascal triangle
+    def nextRow(row: List[Int]): List[Int] = {
+      (0 :: row).zip(row :+ 0).map { case (a, b) => (a + b) % m }
+    }
+    val triangleRows: LazyList[List[Int]] = LazyList.iterate(List(1))(nextRow)
+    val triangle = triangleRows.take(size).toArray
+    val image = Seq.tabulate(size, size) { (i, j) =>
+      if (j <= i) funct(triangle(i)(j))
+      else Pixel(0, 0, 0) // initialize the pixel with black color
+    }.toList.map(_.toList) // convert the Seq to List of Lists
+
+    image
+  }
 }
