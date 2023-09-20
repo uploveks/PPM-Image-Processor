@@ -78,7 +78,18 @@ object Solution {
   }
 
 
+  /**
+   * Reverses a list of integers.
+   * @param l the list to be reversed
+   * @return the reversed list
+   */
   def reverse(l: List[Int]): List[Int] = {
+    /*
+    Helper function to reverse the list using tail recursion.
+    @param acc the accumulator for the reversed list
+    @param l the list to be reversed
+    @return the reversed list
+     */
     def loop(acc: List[Int], l: List[Int]): List[Int] =
       l match {
         case Nil => acc
@@ -88,6 +99,12 @@ object Solution {
     loop(Nil, l)
   }
 
+  /**
+   *
+   * Transposes an image.
+   * @param image the image to be transposed
+   * @return the transposed image
+   */
   def transpose(image: Image): Image =
     image match {
       case Nil :: _ => Nil
@@ -95,6 +112,14 @@ object Solution {
     }
 
   // ex 3
+
+  /**
+   *
+   * Rotates an image by the specified number of degrees.
+   * @param image   the image to be rotated
+   * @param degrees the number of degrees to rotate the image by
+   * @return the rotated image
+   */
   def rotate(image: Image, degrees: Int): Image = {
     val numRotations = (360 - degrees) / 90
     val rotatedImage = numRotations match {
@@ -128,50 +153,53 @@ object Solution {
   )
 
 
-  //please complete the edge detection function and apply convolution function
-
+  /**
+   * Applies the Sobel edge detection algorithm to a grayscale image.
+   * @param image the grayscale image to apply the algorithm to
+   * @param threshold the theshold value for edge detection
+   * @return the image after the edge detection algorithm has been applied
+   */
   def edgeDetection(image: Image, threshold: Double): Image = {
-    //applu grayscale on fucntion
     val grayScaleImage = image.map(_.map(toGrayScale))
-    //apply gaussian blur on convolution
     val gaussianBlurImage = applyConvolution(grayScaleImage, gaussianBlurKernel)
-    //apply Gx and Gy on convolution
     val GxImage = applyConvolution(gaussianBlurImage, Gx)
     val GyImage = applyConvolution(gaussianBlurImage, Gy)
-    //Se vor combina Mx și My, adunându-se (element cu element) fiecare pixel în modul (astfel, obtinem o aproximare destul de buna a schimbarii de intensitate in jurul fiecarui pixel)
-    //use this formula to get MxMy Sobel filtering involves applying two 3 x 3 convolutional kernels (also called filters) to an image. The kernels are usually called Gx and Gy, and they are shown in the following figure. These two kernels detect the edges in the image in the horizontal and vertical directions. They are applied separately and then combined to produce a pixel value in the output image at each position in the input image.
-    //
-    //The output value is approximated by:
-    //
-    //G = |Gx| + |Gy|
-    //where Gx and Gy are the values of the two kernels at the same position in the image.
-    //write the code to get MxMy
     val MxMyImage = GxImage.zip(GyImage).map(x => x._1.zip(x._2).map(y => Math.abs(y._1) + Math.abs(y._2)))
-    //A threshold T will be set, so that every pixel with a value lower than T will be black (rgb 0 0 0) and every pixel above T will be white (rgb 255 255 255)
     val thresholdImage = MxMyImage.map(_.map(x => if (x < threshold) 0 else 255))
-    //write the final result
     thresholdImage.map(_.map(x => Pixel(x, x, x)))
 
   }
 
 
+  /**
+   * Applies a convolution operation on an image using a given kernel.
+   * @param image the grayscale image to apply the convolution to
+   * @param kernel the convolution kernel
+   * @return the image after the convolution has been applied
+   */
   def applyConvolution(image: GrayscaleImage, kernel: GrayscaleImage): GrayscaleImage = {
-    //In order to perform convolution on an image, following steps should be taken.
-    //
-    //Flip the mask (horizontally and vertically) only once
-    //Slide the mask onto the image.
-    //Multiply the corresponding elements and then add them
-    //Repeat this procedure until all values of the image has been calculated.
-    //write the code to perform convolution
-    //hint: use getNeighbors function
     val neighbors = getNeighbors(image, kernel.length / 2)
     val result = neighbors.map(_.map(x => x.zip(kernel).map(y => y._1.zip(y._2).map(z => z._1 * z._2).sum).sum))
     result
   }
 
   // ex 5
+
+  /**
+   * Generates an image of size size where each pixel is determined by
+   * applying the function funct to the modulo of the
+   * corresponding element of Pascal's triangle with respect to m.
+   * @param m The value to be used for the modulo operation
+   * @param funct The function to be applied to the modulo of the elements of Pascal's triangle
+   * @param size The size of the image to be generated
+   * @return The generated image
+   */
   def moduloPascal(m: Integer, funct: Integer => Pixel, size: Integer): Image = {
-    // create a function that generates the next row of the Pascal triangle
+    /*
+    Generates the next row of Pascal's triangle given the previous row.
+    @param row The previous row of Pascal's triangle.
+    @return The next row of Pascal's triangle.
+     */
     def nextRow(row: List[Int]): List[Int] = {
       (0 :: row).zip(row :+ 0).map { case (a, b) => (a + b) % m }
     }
